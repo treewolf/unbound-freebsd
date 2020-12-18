@@ -1,4 +1,4 @@
-# unbound-freebsd
+# unbound-blocklist_updater
 ## Purpose
 Update unbound's blocklist automatically.
 Script is run from a cron job.
