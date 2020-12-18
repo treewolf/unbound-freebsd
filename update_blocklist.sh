@@ -76,7 +76,7 @@ commitlist(){
 
 # Removes lists in /tmp
 cleantmp(){
-    cd "$TEMP_SUBDIR" || ( echo Could not change directory to "'$TEMP_SUBDIR'" && exit 1 )
+    cd /tmp || ( echo Could not change directory to /tmp && exit 1 )
 
     rm "$TEMP_SUBDIR"/*
     rmdir "$TEMP_SUBDIR"
