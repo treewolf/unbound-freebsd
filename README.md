@@ -1,4 +1,4 @@
-# unbound-blocklist_updater
+# unbound blocklist updater
 ## Purpose
 Update unbound's blocklist automatically.
 Script is run from a cron job.
