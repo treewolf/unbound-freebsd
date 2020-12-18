@@ -12,16 +12,19 @@
 # Expects directory to be present
 CONFIG_DIR="/var/unbound/conf.d/block"
 
-# Temp directory inside /tmp
-TEMP_SUBDIR="/tmp/$0"
+# Temp directory inside /var/tmp
+TEMP_SUBDIR="/var/tmp/$0"
 
 # URLs for the block lists
 LIST_ADS="https://blocklistproject.github.io/Lists/alt-version/ads-nl.txt"
 LIST_SCAM="https://blocklistproject.github.io/Lists/alt-version/scam-nl.txt"
 LIST_REDIRECT="https://blocklistproject.github.io/Lists/alt-version/redirect-nl.txt"
 LIST_RANSOMWARE="https://blocklistproject.github.io/Lists/alt-version/ransomware-nl.txt"
+LIST_PHISHING="https://blocklistproject.github.io/Lists/alt-version/phishing-nl.txt"
+LIST_MALWARE="https://blocklistproject.github.io/Lists/alt-version/malware-nl.txt"
+LIST_FRAUD="https://blocklistproject.github.io/Lists/alt-version/fraud-nl.txt"
 
-# Setup tmp dir in /tmp
+# Setup tmp dir in /var/tmp
 setup(){
     mkdir -p "$TEMP_SUBDIR" || ( echo Could not create directory "'$TEMP_SUBDIR'" && exit 1 )
     echo Setup complete.
@@ -74,9 +77,9 @@ commitlist(){
     mv "$filename.tmp" "$filename"
 }
 
-# Removes lists in /tmp
+# Removes lists in /var/tmp
 cleantmp(){
-    cd /tmp || ( echo Could not change directory to /tmp && exit 1 )
+    cd /var/tmp || ( echo Could not change directory to /var/tmp && exit 1 )
 
     rm "$TEMP_SUBDIR"/*
     rmdir "$TEMP_SUBDIR"
@@ -87,7 +90,7 @@ cleantmp(){
 servicecheck(){
     unbound-checkconf
     status=$?
-    [ $status -eq 0 ] || ( echo Failed config check && return 1)
+    [ $status -eq 0 ] || ( echo Failed config check && return 1 )
 }
 
 # Revert changes if unbound config fails
@@ -104,16 +107,25 @@ getlist "$LIST_ADS"
 getlist "$LIST_SCAM"
 getlist "$LIST_REDIRECT"
 getlist "$LIST_RANSOMWARE"
+getlist "$LIST_PHISHING"
+getlist "$LIST_MALWARE"
+getlist "$LIST_FRAUD"
 
 parselist "$LIST_ADS"
 parselist "$LIST_SCAM"
 parselist "$LIST_REDIRECT"
 parselist "$LIST_RANSOMWARE"
+parselist "$LIST_PHISHING"
+parselist "$LIST_MALWARE"
+parselist "$LIST_FRAUD"
 
 copylist "$LIST_ADS"
 copylist "$LIST_SCAM"
 copylist "$LIST_REDIRECT"
 copylist "$LIST_RANSOMWARE"
+copylist "$LIST_PHISHING"
+copylist "$LIST_MALWARE"
+copylist "$LIST_FRAUD"
 
 servicecheck
 status=$?
@@ -123,6 +135,9 @@ if [ $status -eq 0 ]; then
     commitlist "$LIST_SCAM"
     commitlist "$LIST_REDIRECT"
     commitlist "$LIST_RANSOMWARE"
+    commitlist "$LIST_PHISHING"
+    commitlist "$LIST_MALWARE"
+    commitlist "$LIST_FRAUD"
     unbound-control reload && echo Unbound service restarted
     cleantmp
     unbound-control status
@@ -132,5 +147,8 @@ else
     revert "$LIST_SCAM"
     revert "$LIST_REDIRECT"
     revert "$LIST_RANSOMWARE"
+    revert "$LIST_PHISHING"
+    revert "$LIST_MALWARE"
+    revert "$LIST_FRAUD"
     echo Revert complete.
 fi
