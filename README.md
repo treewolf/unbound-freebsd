@@ -14,3 +14,5 @@ Script is run from a cron job.
 - FreeBSD 12.2-RELEASE on a raspberry pi 3b
 - unbound-1.10.1
 - Block lists are sourced from https://github.com/blocklistproject/Lists
+
+### Uses shellcheck to check for posix compliance.
