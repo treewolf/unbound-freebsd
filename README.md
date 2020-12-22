@@ -13,6 +13,13 @@ Script is run from a cron job.
 ## What I am running
 - FreeBSD 12.2-RELEASE on a raspberry pi 3b
 - unbound-1.10.1
-- Block lists are sourced from https://github.com/blocklistproject/Lists
 
-### Uses shellcheck to check for posix compliance.
+## Block lists
+These block lists are from multiple open source repos:
+|Homepage|
+|---|
+|https://github.com/blocklistproject/Lists|
+|https://adaway.org/|
+|https://github.com/Yhonay/antipopads|
+
+Uses [shellcheck](https://github.com/koalaman/shellcheck) for posix compliance.

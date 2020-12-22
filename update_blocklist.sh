@@ -18,49 +18,48 @@ TEMP_SUBDIR="/var/tmp/$0"
 # Name of final file
 FINAL_NAME="merged.txt"
 
-# URLs for the block lists
-LIST_BL_AD="https://blocklistproject.github.io/Lists/alt-version/ads-nl.txt"
-LIST_BL_SCAM="https://blocklistproject.github.io/Lists/alt-version/scam-nl.txt"
-LIST_BL_REDIRECT="https://blocklistproject.github.io/Lists/alt-version/redirect-nl.txt"
-LIST_BL_RANSOMWARE="https://blocklistproject.github.io/Lists/alt-version/ransomware-nl.txt"
-LIST_BL_PHISHING="https://blocklistproject.github.io/Lists/alt-version/phishing-nl.txt"
-LIST_BL_MALWARE="https://blocklistproject.github.io/Lists/alt-version/malware-nl.txt"
-LIST_BL_FRAUD="https://blocklistproject.github.io/Lists/alt-version/fraud-nl.txt"
-
 # Setup tmp dir in /var/tmp
 setup(){
     ( mkdir -p "$TEMP_SUBDIR" && echo Setup complete. ) || ( echo Could not create directory "'$TEMP_SUBDIR'" && exit 1 )
+}
+
+# Parses a file
+# Expects 1 argument: filename
+parselist(){
+    cd "$TEMP_SUBDIR" || ( echo Could not change directory to "'$TEMP_SUBDIR'" && exit 1 )
+
+    # Remove comments
+    sed -i '' "s/[\s]*[#\!@].*//g" "$1"
+
+    # Remove headers
+    sed -i '' 's/127\.0\.0\.1 localhost//g' "$1"
+    sed -i '' 's/::1 localhost//g' "$1"
+
+    # Remove any 0.0.0.0
+    sed -i '' 's/[\s]*0\.0\.0\.0[\s]*//g' "$1"
+
+    # Remove any 127.0.0.1
+    sed -i '' 's/[\s]*127\.0\.0\.1[\s]*//g' "$1"
+
+    # Remove symbols
+    sed -i '' 's/[|^\r]//g' "$1"
+
+    # Remove empty lines
+    awk 'NF > 0' "$1"> "$1".tmp
+
+    # Syntax for unbound
+    sed -i '' -e 's/\(.*\)/local-zone: "\1" refuse /' "$1".tmp
+
+    # If file is not empty, then continue
+    ( [ -s "$1".tmp ] && echo File "'$1'" parsed successfully. ) || ( echo File "$1".tmp returned empty && exit 1 )   
 }
 
 # Gets list from the awesome github repo
 # Expects 1 arg: LIST_* var
 getlist(){
     cd "$TEMP_SUBDIR" || ( echo Could not change directory to "'$TEMP_SUBDIR'" && exit 1 )
-    ( fetch -q "$1"  && echo "'$1'" fetched successfully. ) || ( echo URL "'$1'" failed to get file && exit 1)
-    
-}
-
-# Parses a file
-# Expects 1 argument: LIST_* variable
-parselist_BL(){
-    cd "$TEMP_SUBDIR" || ( echo Could not change directory to "'$TEMP_SUBDIR'" && exit 1 )
-
-    filename="$(echo "$1" | awk -F/ '{print $NF}' )"
-
-    # Remove lines after '#'
-    sed -i '' 's/[\s]*#.*//g' "$filename"
-
-    # Remove any 0.0.0.0
-    sed -i '' 's/[\s]*0\.0\.0\.0[\s]*//g' "$filename"
-
-    # Remove empty lines
-    awk 'NF > 0' "$filename"> "$filename".tmp
-
-    # Syntax for unbound
-    sed -i '' -e 's/\(.*\)/local-zone: "\1" refuse /' "$filename".tmp
-
-    # If file is not empty, then continue
-    ( [ -s "$filename".tmp ] && echo File "'$filename'" parsed successfully. ) || ( echo File "$filename".tmp returned empty && exit 1 )   
+    filename=$( echo "$1" | md5 -q )
+    ( fetch -q "$1" -o "$filename" && echo "'$1'" fetched successfully. && parselist "$filename") || ( echo URL "'$1'" failed to get file && exit 1 )
 }
 
 # Moves final list to the blocklist directory
@@ -73,7 +72,7 @@ copylist(){
 # Removes lists in /var/tmp
 cleantmp(){
     cd /var/tmp || ( echo Could not change directory to /var/tmp && exit 1 )
-    ( rm "$TEMP_SUBDIR"/* && rmdir "$TEMP_SUBDIR" && echo Clean up process finished. ) || ( echo Failed to clean "'$TEMP_SUBDIR'" && exit 1)
+    ( rm "$TEMP_SUBDIR"/* && rmdir "$TEMP_SUBDIR" && echo Clean up process finished. ) || ( echo Failed to clean "'$TEMP_SUBDIR'" && exit 1 )
 }
 
 # Check unbound config for errors
@@ -91,23 +90,15 @@ revert(){
 
 # Start
 setup
-getlist  "$LIST_BL_AD" &
-getlist "$LIST_BL_SCAM" &
-getlist "$LIST_BL_REDIRECT" & 
-getlist "$LIST_BL_RANSOMWARE" &
-getlist "$LIST_BL_PHISHING" &
-getlist "$LIST_BL_MALWARE" &
-getlist "$LIST_BL_FRAUD" &
-
-wait
-
-parselist_BL "$LIST_BL_AD" &
-parselist_BL "$LIST_BL_SCAM" &
-parselist_BL "$LIST_BL_REDIRECT" &
-parselist_BL "$LIST_BL_RANSOMWARE" &
-parselist_BL "$LIST_BL_PHISHING" &
-parselist_BL "$LIST_BL_MALWARE" &
-parselist_BL "$LIST_BL_FRAUD" &
+getlist "https://blocklistproject.github.io/Lists/alt-version/ads-nl.txt" &
+getlist "https://blocklistproject.github.io/Lists/alt-version/scam-nl.txt" &
+getlist "https://blocklistproject.github.io/Lists/alt-version/redirect-nl.txt" & 
+getlist "https://blocklistproject.github.io/Lists/alt-version/ransomware-nl.txt" &
+getlist "https://blocklistproject.github.io/Lists/alt-version/phishing-nl.txt" &
+getlist "https://blocklistproject.github.io/Lists/alt-version/malware-nl.txt" &
+getlist "https://blocklistproject.github.io/Lists/alt-version/fraud-nl.txt" &
+getlist "https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts" &
+getlist "https://raw.githubusercontent.com/AdAway/adaway.github.io/master/hosts.txt" &
 
 wait
 
