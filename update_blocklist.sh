@@ -10,7 +10,7 @@
 #
 
 # Expects directory to be present
-CONFIG_DIR="/var/unbound/conf.d/block"
+CONFIG_DIR="/usr/local/var/unbound/conf.d/block"
 
 # Temp directory inside /var/tmp
 TEMP_SUBDIR="/var/tmp/$0"
