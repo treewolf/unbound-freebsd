@@ -94,8 +94,10 @@ getlist "https://blocklistproject.github.io/Lists/alt-version/ads-nl.txt" &
 getlist "https://blocklistproject.github.io/Lists/alt-version/scam-nl.txt" &
 getlist "https://blocklistproject.github.io/Lists/alt-version/redirect-nl.txt" & 
 getlist "https://blocklistproject.github.io/Lists/alt-version/ransomware-nl.txt" &
+wait
 getlist "https://blocklistproject.github.io/Lists/alt-version/phishing-nl.txt" &
 getlist "https://blocklistproject.github.io/Lists/alt-version/malware-nl.txt" &
+wait
 getlist "https://blocklistproject.github.io/Lists/alt-version/fraud-nl.txt" &
 getlist "https://raw.githubusercontent.com/Yhonay/antipopads/master/hosts" &
 getlist "https://raw.githubusercontent.com/AdAway/adaway.github.io/master/hosts.txt" &
